@@ -133,3 +133,8 @@ dmypy.json
 data
 result
 .venv-cu11
+
+
+# Added for NLP capstone
+constants.txt
+logs/
