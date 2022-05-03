@@ -16,17 +16,36 @@ def convert_anli(split):
         avail_datasets.append(load_dataset('anli', split='train_r1'))
         avail_datasets.append(load_dataset('anli', split='train_r2'))
         avail_datasets.append(load_dataset('anli', split='train_r3'))
-    
+
+    # Key: Premises, values=[entailment (label 0), contradiction (label 1)]
+    premises = {}
+    for dataset in avail_datasets:
+        # for instance in dataset:
+        #     writer.writerow([instance['hypothesis'].replace(",", ""), instance['premise'].replace(",", "")])
+        for instance in dataset:
+            premise = instance['premise'].replace(",", "")
+            if premise in premises:
+                if instance['label'] == 1:
+                    premises[premise][1] = instance['hypothesis'].replace(",", "")
+                elif instance['label'] == 0:
+                    premises[premise][0] = instance['hypothesis'].replace(",", "")
+            else:
+                if instance['label'] == 1:
+                    premises[premise] = ["", instance['hypothesis'].replace(",", "")]
+                elif instance['label'] == 0:
+                    premises[premise] = [instance['hypothesis'].replace(",", ""), ""]
+
     f = open('data/anli_for_simcse.csv', 'w')
     writer = csv.writer(f)
-    writer.writerow(["sent0","sent1"])
-    for dataset in avail_datasets:
-        for instance in dataset:
-            writer.writerow([instance['hypothesis'].replace(",", ""), instance['premise'].replace(",", "")])
+    writer.writerow(["sent0","sent1", "hard_neg"])
+    for premise in premises.keys():
+        if premises[premise][0] != "" and premises[premise][1] != "":
+            # log into dataset
+            writer.writerow([premise, premises[premise][0], premises[premise][1]])
     f.close()
 
 def main():
-    convert_anli('train_r1')
+    convert_anli('all')
 
 if __name__ == "__main__":
     main()
