@@ -10,6 +10,7 @@ import random
 
 from datasets import load_dataset
 
+import torch.nn as nn
 import transformers
 from transformers import (
     CONFIG_MAPPING,
@@ -90,6 +91,12 @@ class ModelArguments:
         default=0.05,
         metadata={
             "help": "Temperature for softmax."
+        }
+    )
+    set_dropout: float = field(
+        default=0.1,
+        metadata={
+            "help": "Change the dropout."
         }
     )
     pooler_type: str = field(
@@ -330,6 +337,8 @@ def main():
         config = CONFIG_MAPPING[model_args.model_type]()
         logger.warning("You are instantiating a new config instance from scratch.")
 
+    # config.hidden_dropout_prob=model_args.set_dropout
+
     tokenizer_kwargs = {
         "cache_dir": model_args.cache_dir,
         "use_fast": model_args.use_fast_tokenizer,
@@ -378,6 +387,12 @@ def main():
         model = AutoModelForMaskedLM.from_config(config)
 
     model.resize_token_embeddings(len(tokenizer))
+
+    for name, module in model.named_modules():
+        if type(module) == nn.Dropout:
+            module.p = model_args.set_dropout
+    #         print(name, module.p)
+    # exit()
 
     # Prepare features
     column_names = datasets["train"].column_names
