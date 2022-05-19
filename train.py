@@ -364,7 +364,7 @@ def main():
     if model_args.model_name_or_path:
         if 'roberta' in model_args.model_name_or_path:
             if model_args.from_scratch:
-                model = RobertaForCL.from_config(config)
+                model = RobertaForCL.from_config(config, model_args=model_args)
             else:
                 model = RobertaForCL.from_pretrained(
                     model_args.model_name_or_path,
@@ -377,7 +377,7 @@ def main():
                 )
         elif 'bert' in model_args.model_name_or_path:
             if model_args.from_scratch:
-                model = BertForCL.from_config(config)
+                model = BertForCL(config, model_args=model_args)
             else:
                 model = BertForCL.from_pretrained(
                     model_args.model_name_or_path,
